@@ -6,36 +6,31 @@ import numpy as np
 
 Box = namedtuple('Box', ["minX", "maxX", "minY", "maxY"])
 
+#Seems unused probably should delete
+#def rotate_image(image, angle):
+#    image_center = tuple(np.array(image.shape[1::-1]) / 2)
+#    rot_mat = cv2.getRotationMatrix2D(image_center, angle, 1.0)
+#    result = cv2.warpAffine(image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
+#    return result
 
-def rotate_image(image, angle):
-    image_center = tuple(np.array(image.shape[1::-1]) / 2)
-    rot_mat = cv2.getRotationMatrix2D(image_center, angle, 1.0)
-    result = cv2.warpAffine(image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
-    return result
-
-
-def getCropBox(image):
-    w = image.shape[0]
-    h = image.shape[1]
-    minX = w
-    maxX = 0
-    minY = h
-    maxY = 0
-    for x in range(0, w):
-        for y in range(0, h):
-            if image[x, y] > 0:
-                minX = min(minX, x)
-                maxX = max(maxX, x)
-                minY = min(minY, y)
-                maxY = max(maxY, y)
-    maxX += 1
-    maxY += 1
-    return Box(minX, maxX, minY, maxY)
-
-
-def crop(image, box: Box):
-    return image[box.minX:box.maxX, box.minY:box.maxY]
-
+#Seems unused probably should delete
+#def getCropBox(image):
+#    w = image.shape[0]
+#    h = image.shape[1]
+#    minX = w
+#    maxX = 0
+#    minY = h
+#    maxY = 0
+#    for x in range(0, w):
+#        for y in range(0, h):
+#            if image[x, y] > 0:
+#                minX = min(minX, x)
+#                maxX = max(maxX, x)
+#                minY = min(minY, y)
+#                maxY = max(maxY, y)
+#    maxX += 1
+#    maxY += 1
+#    return Box(minX, maxX, minY, maxY)
 
 def contourToBox(contour, inflate=0):
     minX = float('inf')
@@ -52,23 +47,6 @@ def contourToBox(contour, inflate=0):
         maxY = max(maxY, y)
     return Box(minX-inflate, maxX+inflate, minY-inflate, maxY+inflate)
 
-
-def opening(img, sl):
-    return cv2.morphologyEx(img, cv2.MORPH_OPEN, sl)
-
-
-def closing(img, sl):
-    return cv2.morphologyEx(img, cv2.MORPH_CLOSE, sl)
-
-
-def rect(x, y):
-    return cv2.getStructuringElement(cv2.MORPH_RECT, (x, y))
-
-
-def square(s):
-    return rect(s, s)
-
-
 def isInvalidImage(image):
     if image is None or image.shape[0] < 10 or image.shape[1] < 30:
         return True
@@ -77,7 +55,8 @@ def isInvalidImage(image):
 def binarize(screen):
     screen = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
     screen = cv2.adaptiveThreshold(screen, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 8)
-    screen = opening(screen, square(5))
+    screen = cv2.morphologyEx(screen, cv2.MORPH_RECT, cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5)))
+
     return screen
 
 # we might wanna include the brightness of the screen
@@ -93,12 +72,13 @@ def localize(screen, display_steps=False):
         if (b[3] - b[2]) * (b[1] - b[0]) < (screen.shape[0] * screen.shape[1]) / 8 or not (1.4 < widthRatio < 1.8 or 1.4 < 1 / widthRatio < 1.8):
             continue
         cs.append(c)
-        s = crop(screen, b)
+        s = screen[b.minX:b.maxX, b.minY:b.maxY]
         return s
 
     return None
 
 
+#Seems unused probably should delete
 # # get rotation angle from a cropped plate so it would be axis aligned.
 # def rotateScreen(screen):
 #     if isInvalidImage(screen):
@@ -125,9 +105,7 @@ def localize(screen, display_steps=False):
 #
 #     return localize(r_screen)
 
-
 def screen_detection(image, display_steps=False):
-    # localize
     screen = localize(image, display_steps)
 
     if display_steps and screen is not None:

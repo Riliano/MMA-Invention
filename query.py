@@ -10,14 +10,7 @@ import Localization
 
 parser = argparse.ArgumentParser(description='Query tool for the video database created by <TODO>. Returns a filename for the best match.')
 
-default = "Input Videos/" + os.listdir("Input Videos")[0], #temp
 parser.add_argument('query', type=pathlib.Path, help='The path to the query video.')
-
-
-
-def processFrame(frame, display_steps=True):
-    localizedFrame = Localization.screen_detection(frame, display_steps)
-
 
 def processVideo(video, sample_frequency=1):
     frame_number = 0
@@ -25,20 +18,13 @@ def processVideo(video, sample_frequency=1):
     fps = int(video.get(cv2.CAP_PROP_FPS))
     frames_per_sample = fps // sample_frequency
 
-    print('ble', video.isOpened())
     while video.isOpened() and frame_number < frame_count:
         ret, frame = video.read()
         if frame_number % frames_per_sample == 0:
-            processFrame(frame)
+            localizedFrame = Localization.screen_detection(frame, display_steps=True)
         frame_number += 1
 
-
-def getVideo(index=0):
-    path = "Input Videos/" + os.listdir("Input Videos")[index]
-    print(path)
-    return cv2.VideoCapture(path)
-
-def main():
+if __name__ == "__main__":
     args = parser.parse_args()
     path = args.query.resolve()
 
@@ -48,9 +34,4 @@ def main():
         print("Error opening video stream or file. Does the path exist?")
 
     print('Results for: ' + path.name)
-    #video = getVideo()
     processVideo(video)
-
-
-if __name__ == "__main__":
-    main()
