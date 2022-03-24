@@ -37,13 +37,23 @@ def process_frames(filename, process_func, skip_frames = 1):
         print("Frame: " + str(cur_frame) + " / " + str(frame_count), end="\r")
 
         frame_list.append( (cur_frame, process_func(frame)) )
+        print(frame_list)
 
     print()
+    print("Done", frame_list)
     return frame_list
 
 #TODO
+
+sift = cv2.SIFT_create()
 def extract_sift(frame):
-    return []
+
+    # note!!
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    kp, desc = sift.detectAndCompute(gray, None)
+    print(desc)
+    return desc
 
 def index_framelist(frame_list, filename):
     print("TODO: Insert into DB", filename)
@@ -53,6 +63,40 @@ video_types = ('*.mp4', '*.MP4', '*.avi') #webm?
 if __name__ == "__main__":
     args = parser.parse_args()
     path = args.path.resolve()
+
+# "Inspired" by dbt.py
+#    #db_name = args.prefix + base + '.db'
+#    db_name = "./output.db"
+#
+#    #check if database already exists
+#    new = False
+#    if os.path.isfile(db_name):
+#        action = raw_input('Database already exists. Do you want to (r)emove, (a)ppend or (q)uit? ')
+#        print('action =', action)
+#    else:
+#        action = 'c'
+#
+#    if action == 'r':
+#        print('removing database', db_name , '...')
+#        os.remove(db_name)
+#        new = True
+#
+#    elif action == 'a':
+#        print('appending to database ... ')
+#
+#    elif action == 'c':
+#        print('creating database', db_name, '...')
+#        new = True
+#
+#    else:
+#        print('Quit database tool')
+#        sys.exit(0)
+#
+#    # Create indexer which can create the database tables and provides an API to insert data into the tables.
+#    indx = db_index.Indexer(db_name)
+#    if new == True:
+#        indx.create_tables()
+# End of inspiration
 
     video_list = []
     for t in video_types:
