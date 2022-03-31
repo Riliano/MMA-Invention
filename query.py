@@ -24,6 +24,8 @@ def processVideo(video, sample_frequency=1):
             localizedFrame = Localization.screen_detection(frame, display_steps=True)
         frame_number += 1
 
+    return "return video name here"
+
 if __name__ == "__main__":
     args = parser.parse_args()
     path = args.query.resolve()
