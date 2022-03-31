@@ -1,3 +1,5 @@
 .idea
 __pycache__
 Videos
+output.db
+_sift_vocabulary.pkl
