@@ -108,14 +108,15 @@ if __name__ == "__main__":
 
     fname = './_sift_vocabulary.pkl'
     if os.path.isfile(fname):
-        print("Found existing vocabulary: " + fname + " It will be recomputed!")
+        print("Found existing vocabulary: " + fname + " It will be REUSED!")
 
-    print('Creating SIFT vocabulary ... ')
-    sift_vocabulary = Vocabulary.Vocabulary(db_name)
-    sift_vocabulary.train(sift_features)
+    print('Reading SIFT vocabulary ... ')
+    #sift_vocabulary = Vocabulary.Vocabulary(db_name)
+    #sift_vocabulary.train(sift_features)
     fname = './_sift_vocabulary.pkl'
-    with open(fname, 'wb') as f:
-        pickle.dump(sift_vocabulary, f)
+#    with open(fname, 'wb') as f:
+    with open(fname, 'rb') as f:
+        sift_vocabulary = pickle.load(f)
 
     for i in name_list:
         indx.add_to_index('sift', i, sift_features[i], sift_vocabulary)
