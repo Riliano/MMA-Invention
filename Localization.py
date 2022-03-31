@@ -38,30 +38,39 @@ def isInvalidImage(image):
 
 def binarize(screen):
     screen = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
-    screen = cv2.adaptiveThreshold(screen, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 21, 8)
-    screen = cv2.morphologyEx(screen, cv2.MORPH_RECT, cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5)))
+    screen = cv2.Canny(screen, 50, 100, 1)
+    screen = cv2.morphologyEx(screen, cv2.MORPH_DILATE, cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3)))
+    screen = cv2.bitwise_not(screen)
 
     return screen
 
 
 # we might wanna include the brightness of the screen
-def localize(screen, display_steps=False):
-    mask = cv2.bitwise_not(binarize(screen))
+def localize(screen, display_steps=False, takeExternal=True):
+    mask = binarize(screen)
+    mask = mask if takeExternal else cv2.bitwise_not(mask)
     contours, h = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    if display_steps:
+        screenCopy = mask.copy()
+        screenCopy = cv2.cvtColor(screenCopy, cv2.COLOR_GRAY2BGR)
+        cv2.drawContours(image=screenCopy, contours=contours, contourIdx=-1, color=(0, 255, 0), thickness=2, lineType=cv2.LINE_AA)
+        cv2.imshow("contours screen", screenCopy)
 
     cs = []
     for c in contours:
         b = contourToBox(c, 0)
         widthRatio = (b[3] - b[2] + 1) / (b[1] - b[0] + 1)
-
-        if (b[3] - b[2]) * (b[1] - b[0]) < (screen.shape[0] * screen.shape[1]) / 8 or not (
-                1.4 < widthRatio < 1.8 or 1.4 < 1 / widthRatio < 1.8):
+        surface = (b[3] - b[2]) * (b[1] - b[0])
+        if surface < (screen.shape[0] * screen.shape[1]) / 8 or surface > (screen.shape[0] * screen.shape[1]) / 1.2 or not 1.4 < widthRatio < 1.9: #or 1.4 < 1 / widthRatio < 1.8):
             continue
         cs.append(c)
         s = screen[b.minX:b.maxX, b.minY:b.maxY]
         return s
 
-    return None
+    if takeExternal:
+        return localize(screen, display_steps, False)
+    return screen
 
 
 def screen_detection(image, display_steps=False):
