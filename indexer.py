@@ -119,5 +119,6 @@ if __name__ == "__main__":
 
     for i in name_list:
         indx.add_to_index('sift', i, sift_features[i], sift_vocabulary)
+    indx.db_commit()
 
     print("Done")
