@@ -16,6 +16,8 @@ parser.add_argument('query', type=pathlib.Path, help='The path to the test folde
 
 def getFiles(path):
     files = os.listdir(path)
+    files.sort()
+    print("File list: " + str(files))
     groundTruth = None
     testVideos = []
     for f in files:
@@ -43,7 +45,8 @@ def evaluate(path):
         v = cv2.VideoCapture(str(path) + "/" + videos[i])
         t = truth[i]
 
-        result = query.processVideo(v)
+        result = query.processVideo(v, 0.15)
+        print("Result is: " + result + " ground truth: " + t)
         if result == t:
             score += 1
 

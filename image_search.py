@@ -12,11 +12,11 @@ class Searcher:
     def __del__(self):
         self.con.close()
 
-    def candidates_from_word(self, blq, imword):
+    def candidates_from_word(self, type, imword):
         """ Get list of images containing imword/ """
 
         im_ids = self.con.execute(
-                "select distinct imid from "+blq+"_imwords where wordid=%d" % imword).fetchall()
+                "select distinct imid from "+type+"_imwords where wordid=%d" % imword).fetchall()
         return [i[0] for i in im_ids]
 
 
@@ -34,7 +34,7 @@ class Searcher:
         i = np.argsort(result)
         return (np.array(names)[i] , np.array(result)[i])
 
-    def candidates_from_histogram(self, blq, imwords):
+    def candidates_from_histogram(self, type, imwords):
         """ Get list of images wth similar words. """
 
         # get the word ids
@@ -43,7 +43,7 @@ class Searcher:
         # find candidates
         candidates = []
         for word in words:
-            c = self.candidates_from_word(blq, word)
+            c = self.candidates_from_word(type, word)
             candidates += c
         
         # take all unique words and reverse sort on occurence
@@ -66,12 +66,12 @@ class Searcher:
 
 
     
-    def get_imhistogram(self, blq, imname):
+    def get_imhistogram(self, type, imname):
         """ Return the word histogram for an image. """
 
         im_id = self.get_imid(imname)
         s = self.con.execute(
-                "select histogram from "+blq+"_imhistograms where rowid='%d'" % im_id).fetchone()
+                "select histogram from "+type+"_imhistograms where rowid='%d'" % im_id).fetchone()
 
         # use pickle to decode NumPy arrays from string
         return pickle.loads(s[0])
