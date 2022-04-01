@@ -13,8 +13,8 @@ def extract_sift(frame_list):
         im = f[0]
         name = f[1].split('/')[-1]
 
-        print("Processing: " + str(i) + " / " + str(total), end="\r")
         i += 1
+        print("Processing: " + str(i) + " / " + str(total), end="\r")
 
         gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
         kp, desc = sift.detectAndCompute(gray, None)
